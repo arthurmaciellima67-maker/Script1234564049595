@@ -1,54 +1,48 @@
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 
-local gui = Instance.new("ScreenGui")
-gui.Name = "FormigaGUI"
-gui.ResetOnSpawn = false
-gui.Parent = player:WaitForChild("PlayerGui")
-
-local botao = Instance.new("TextButton")
-botao.Size = UDim2.fromOffset(130, 45)
-botao.Position = UDim2.new(0.1, 0, 0.5, 0)
-botao.Text = "FORMIGA: OFF"
-botao.TextScaled = true
-botao.Active = true
-botao.Draggable = true
-botao.Parent = gui
-
-local ativo = false
-
-local function aplicar()
+local function aplicarFormiga(ativo)
     local char = player.Character
-    local humanoid = char and char:FindFirstChildOfClass("Humanoid")
-    if not humanoid then return end
+    if not char then
+        warn("Personagem ainda não carregou")
+        return
+    end
+
+    local humanoid = char:FindFirstChildOfClass("Humanoid")
+    if not humanoid then
+        warn("Humanoid não encontrado")
+        return
+    end
+
+    print("Tipo de personagem:", humanoid.RigType.Name)
 
     humanoid.DisplayDistanceType =
         Enum.HumanoidDisplayDistanceType.None
 
-    local escalas = {
+    local nomes = {
         "BodyHeightScale",
         "BodyWidthScale",
         "BodyDepthScale",
         "HeadScale"
     }
 
-    for _, nome in ipairs(escalas) do
+    local encontrados = 0
+
+    for _, nome in ipairs(nomes) do
         local escala = humanoid:FindFirstChild(nome)
+
         if escala and escala:IsA("NumberValue") then
             escala.Value = ativo and 0.1 or 1
+            encontrados += 1
         end
+    end
+
+    print("Valores de escala encontrados:", encontrados)
+
+    if encontrados == 0 then
+        warn("Este personagem não tem valores de escala compatíveis.")
     end
 end
 
-botao.Activated:Connect(function()
-    ativo = not ativo
-    botao.Text = ativo and "FORMIGA: ON" or "FORMIGA: OFF"
-    aplicar()
-end)
-
-player.CharacterAdded:Connect(function()
-    task.wait(1)
-    aplicar()
-end)
-
-aplicar()
+-- Teste manual:
+aplicarFormiga(true)
